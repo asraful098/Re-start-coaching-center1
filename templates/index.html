@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Re-start Coaching Center</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style1.css') }}">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='images/c5.png') }}">
+</head>
+<body>
+    <header>
+        <div class="my-icon"></div>
+        <h1>Re-start Coaching Center</h1>
+        <nav>
+            <a href="{{ url_for('home') }}">Home</a>
+            <a href="{{ url_for('admission') }}">Admission</a>
+            <a href="{{ url_for('exam') }}">Exam</a>
+            <a href="{{ url_for('admin') }}">Admin</a>
+        </nav>
+    </header>
+    <main>
+        <section class="welcome-section">
+            <h2>Welcome to Re-start Coaching Center</h2>
+            <p>Join us to restart your academic journey with expert guidance!</p>
+        </section>
+    
+        <div class="slideshow-container">
+            <div class="teacher-slides">
+                <!-- Slides will be dynamically populated -->
+            </div>
+        </div>
+    </main>
+    <footer>
+        <p>© 2025 Re-start Coaching Center</p>
+    </footer>
+
+    <!-- Inject the teacher data as JSON -->
+    <script id="teacher-data" type="application/json">
+        {{ teachers | tojson | safe }}
+    </script>
+
+    <!-- Slideshow script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const slidesContainer = document.querySelector(".teacher-slides");
+            const teacherDataScript = document.getElementById("teacher-data");
+            let teachers = [];
+
+            // Parse teacher data from Flask
+            try {
+                teachers = JSON.parse(teacherDataScript.textContent);
+            } catch (err) {
+                console.error("Failed to parse teacher data:", err);
+            }
+
+            // Fallback if no teacher data is provided
+            if (teachers.length === 0) {
+                teachers.push({ 
+                    img: "/static/images/placeholder.jpeg", 
+                    name: "Placeholder Teacher" 
+                });
+            }
+
+            // Dynamically create slides
+            teachers.forEach((teacher) => {
+                const slide = document.createElement("div");
+                slide.classList.add("teacher-slide");
+                slide.innerHTML = `
+                    <img src="${teacher.img}" alt="${teacher.name}">
+                    <div class="teacher-name">${teacher.name}</div>
+                `;
+                slidesContainer.appendChild(slide);
+            });
+
+            const slides = document.querySelectorAll(".teacher-slide");
+            if (slides.length === 0) {
+                console.error("No slides created for slideshow.");
+                return;
+            }
+
+            let currentIndex = 0;
+
+            // Update slide positions and classes
+            function updateSlides() {
+                slides.forEach((slide) => {
+                    slide.classList.remove("active", "middle", "middle-right", "back", "back-right");
+                });
+
+                slides[currentIndex % slides.length].classList.add("active");
+                slides[(currentIndex + 1) % slides.length].classList.add("middle");
+                slides[(currentIndex + 2) % slides.length].classList.add("middle-right");
+                slides[(currentIndex + 3) % slides.length].classList.add("back");
+                slides[(currentIndex + 4) % slides.length].classList.add("back-right");
+
+                currentIndex = (currentIndex + 1) % slides.length;
+            }
+
+            // Initial update and set interval for slideshow
+            updateSlides();
+            setInterval(updateSlides, 4000);
+        });
+    </script>
+</body>
+</html>
